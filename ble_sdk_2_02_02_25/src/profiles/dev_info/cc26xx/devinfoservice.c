@@ -224,8 +224,8 @@ static gattAttribute_t devInfoAttrTbl[] =
 
     // System ID Declaration
     {
-      { ATT_BT_UUID_SIZE, characterUUID },
-      GATT_PERMIT_READ,
+      { ATT_BT_UUID_SIZE, characterUUID },  // 字符
+      GATT_PERMIT_READ,                     // 读权限
       0,
       &devInfoSystemIdProps
     },
@@ -415,7 +415,7 @@ bStatus_t DevInfo_AddService( void )
   return GATTServApp_RegisterService( devInfoAttrTbl,
                                       GATT_NUM_ATTRS( devInfoAttrTbl ),
                                       GATT_MAX_ENCRYPT_KEY_SIZE,
-                                      &devInfoCBs );
+                                      &devInfoCBs );        // 读写回调函数结构体
 }
 
 /*********************************************************************
@@ -655,6 +655,7 @@ static bStatus_t devInfo_ReadAttrCB( uint16 connHandle, gattAttribute_t *pAttr,
                                      uint16 maxLen, uint8 method )
 {
   bStatus_t status = SUCCESS;
+  // 获取UUID
   uint16 uuid = BUILD_UINT16( pAttr->type.uuid[0], pAttr->type.uuid[1]);
 
   // If the value offset of the Read Blob Request is greater than the
@@ -670,9 +671,10 @@ static bStatus_t devInfo_ReadAttrCB( uint16 connHandle, gattAttribute_t *pAttr,
       }
       else
       {
+          // 判断读取的长度
         // determine read length
         *pLen = MIN(maxLen, (sizeof(devInfoSystemId) - offset));
-
+        // 将数据放到pValue中
         // copy data
         memcpy(pValue, &devInfoSystemId[offset], *pLen);
       }

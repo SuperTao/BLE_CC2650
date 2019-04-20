@@ -295,7 +295,7 @@ static gattAttribute_t simpleProfileAttrTbl[SERVAPP_NUM_ATTR_SUPPORTED] =
 
       // Characteristic 4 configuration
       {
-        { ATT_BT_UUID_SIZE, clientCharCfgUUID },
+        { ATT_BT_UUID_SIZE, clientCharCfgUUID },        //clientCharCfgUUID.在回调函数中当作处理
         GATT_PERMIT_READ | GATT_PERMIT_WRITE,
         0,
         (uint8 *)&simpleProfileChar4Config
@@ -601,6 +601,7 @@ static bStatus_t simpleProfile_ReadAttrCB(uint16_t connHandle,
   if ( pAttr->type.len == ATT_BT_UUID_SIZE )
   {
     // 16-bit UUID
+      // 获取UUID
     uint16 uuid = BUILD_UINT16( pAttr->type.uuid[0], pAttr->type.uuid[1]);
     switch ( uuid )
     {
@@ -616,11 +617,13 @@ static bStatus_t simpleProfile_ReadAttrCB(uint16_t connHandle,
       case SIMPLEPROFILE_CHAR2_UUID:
       case SIMPLEPROFILE_CHAR4_UUID:
         *pLen = 1;
+        // 数据保存在pValue中，返回给客户端，这个pAttr->pValue的值是哪里来的呢？
         pValue[0] = *pAttr->pValue;
         break;
 
       case SIMPLEPROFILE_CHAR5_UUID:
         *pLen = SIMPLEPROFILE_CHAR5_LEN;
+        // 复制数据到pValue中
         VOID memcpy( pValue, pAttr->pValue, SIMPLEPROFILE_CHAR5_LEN );
         break;
 

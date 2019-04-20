@@ -393,6 +393,7 @@ static void SimpleBLEPeripheral_init(void)
   // ******************************************************************
   // Register the current thread as an ICall dispatcher application
   // so that the application can send and receive messages.
+  // 注册信号量，可以通过信号量进行通行
   ICall_registerApp(&selfEntity, &sem);
 
 #ifdef USE_RCOSC
@@ -418,9 +419,11 @@ static void SimpleBLEPeripheral_init(void)
 #endif // USE_FPGA
 
   // Create an RTOS queue for message from profile to be sent to app.
-  appMsgQueue = Util_constructQueue(&appMsg);
+  // 创建消息队列
+    appMsgQueue = Util_constructQueue(&appMsg);
 
   // Create one-shot clocks for internal periodic events.
+    // 创建定时器，触发一次
   Util_constructClock(&periodicClock, SimpleBLEPeripheral_clockHandler,
                       SBP_PERIODIC_EVT_PERIOD, 0, false, SBP_PERIODIC_EVT);
 
@@ -440,29 +443,36 @@ static void SimpleBLEPeripheral_init(void)
     uint16_t advertOffTime = 0;
 
     uint8_t enableUpdateRequest = DEFAULT_ENABLE_UPDATE_REQUEST;
-    uint16_t desiredMinInterval = DEFAULT_DESIRED_MIN_CONN_INTERVAL;
-    uint16_t desiredMaxInterval = DEFAULT_DESIRED_MAX_CONN_INTERVAL;
-    uint16_t desiredSlaveLatency = DEFAULT_DESIRED_SLAVE_LATENCY;
-    uint16_t desiredConnTimeout = DEFAULT_DESIRED_CONN_TIMEOUT;
+    uint16_t desiredMinInterval = DEFAULT_DESIRED_MIN_CONN_INTERVAL;    // 最小连接间隔，100ms,前提是，自动参数更新已经使能
+    uint16_t desiredMaxInterval = DEFAULT_DESIRED_MAX_CONN_INTERVAL;    // 最大连接间隔，1s
+    uint16_t desiredSlaveLatency = DEFAULT_DESIRED_SLAVE_LATENCY;       // latency
+    uint16_t desiredConnTimeout = DEFAULT_DESIRED_CONN_TIMEOUT;         // 连接超时时间， 10
 
     // Set the GAP Role Parameters
+    // 使能广播
     GAPRole_SetParameter(GAPROLE_ADVERT_ENABLED, sizeof(uint8_t),
                          &initialAdvertEnable);
+    // 广播时间，超过设置的时间之后不再进行广播
     GAPRole_SetParameter(GAPROLE_ADVERT_OFF_TIME, sizeof(uint16_t),
                          &advertOffTime);
-
+    // 广播名称， “SimpleBLEperipheral"
     GAPRole_SetParameter(GAPROLE_SCAN_RSP_DATA, sizeof(scanRspData),
                          scanRspData);
+    // 广播数据
     GAPRole_SetParameter(GAPROLE_ADVERT_DATA, sizeof(advertData), advertData);
-
+    // 参数更新使能
     GAPRole_SetParameter(GAPROLE_PARAM_UPDATE_ENABLE, sizeof(uint8_t),
                          &enableUpdateRequest);
+    // 最小连接间隔
     GAPRole_SetParameter(GAPROLE_MIN_CONN_INTERVAL, sizeof(uint16_t),
                          &desiredMinInterval);
+    // 最大连接间隔
     GAPRole_SetParameter(GAPROLE_MAX_CONN_INTERVAL, sizeof(uint16_t),
                          &desiredMaxInterval);
+    // 连接的latency
     GAPRole_SetParameter(GAPROLE_SLAVE_LATENCY, sizeof(uint16_t),
                          &desiredSlaveLatency);
+    // 连接超时时间
     GAPRole_SetParameter(GAPROLE_TIMEOUT_MULTIPLIER, sizeof(uint16_t),
                          &desiredConnTimeout);
   }
@@ -472,8 +482,9 @@ static void SimpleBLEPeripheral_init(void)
 
   // Set advertising interval
   {
+      // 设备可以发现的时候，广播时间间隔100s，也就是100ms发一次广播
     uint16_t advInt = DEFAULT_ADVERTISING_INTERVAL;
-
+    // 设置不同模式的广播时间间隔
     GAP_SetParamValue(TGAP_LIM_DISC_ADV_INT_MIN, advInt);
     GAP_SetParamValue(TGAP_LIM_DISC_ADV_INT_MAX, advInt);
     GAP_SetParamValue(TGAP_GEN_DISC_ADV_INT_MIN, advInt);
@@ -482,25 +493,28 @@ static void SimpleBLEPeripheral_init(void)
 
   // Setup the GAP Bond Manager
   {
+      // 匹配的密钥
     uint32_t passkey = 0; // passkey "000000"
     uint8_t pairMode = GAPBOND_PAIRING_MODE_WAIT_FOR_REQ;
     uint8_t mitm = TRUE;
     uint8_t ioCap = GAPBOND_IO_CAP_DISPLAY_ONLY;
     uint8_t bonding = TRUE;
-
+    // 设置连接的密码
     GAPBondMgr_SetParameter(GAPBOND_DEFAULT_PASSCODE, sizeof(uint32_t),
                             &passkey);
     GAPBondMgr_SetParameter(GAPBOND_PAIRING_MODE, sizeof(uint8_t), &pairMode);
+    // 设置MITM保护
     GAPBondMgr_SetParameter(GAPBOND_MITM_PROTECTION, sizeof(uint8_t), &mitm);
     GAPBondMgr_SetParameter(GAPBOND_IO_CAPABILITIES, sizeof(uint8_t), &ioCap);
     GAPBondMgr_SetParameter(GAPBOND_BONDING_ENABLED, sizeof(uint8_t), &bonding);
   }
-
+  // 初始化GATT部分
    // Initialize GATT attributes
   GGS_AddService(GATT_ALL_SERVICES);           // GAP
   GATTServApp_AddService(GATT_ALL_SERVICES);   // GATT attributes
+  // GATT里面的service,这一部分是默认都有的
   DevInfo_AddService();                        // Device Information Service
-
+  // 添加自己定义的service
 #ifndef FEATURE_OAD_ONCHIP
   SimpleProfile_AddService(GATT_ALL_SERVICES); // Simple GATT Profile
 #endif //!FEATURE_OAD_ONCHIP
@@ -524,7 +538,7 @@ static void SimpleBLEPeripheral_init(void)
     uint8_t charValue3 = 3;
     uint8_t charValue4 = 4;
     uint8_t charValue5[SIMPLEPROFILE_CHAR5_LEN] = { 1, 2, 3, 4, 5 };
-
+    // 给每个参数设置对应的值，应该就是这里赋值给pAttr->pValue
     SimpleProfile_SetParameter(SIMPLEPROFILE_CHAR1, sizeof(uint8_t),
                                &charValue1);
     SimpleProfile_SetParameter(SIMPLEPROFILE_CHAR2, sizeof(uint8_t),
@@ -587,14 +601,15 @@ static void SimpleBLEPeripheral_taskFxn(UArg a0, UArg a1)
     // Note that the semaphore associated with a thread is signaled when a
     // message is queued to the message receive queue of the thread or when
     // ICall_signal() function is called onto the semaphore.
-    ICall_Errno errno = ICall_wait(ICALL_TIMEOUT_FOREVER);
-
+    // 等待信号量，这里会一直阻塞，直到收到信号
+      ICall_Errno errno = ICall_wait(ICALL_TIMEOUT_FOREVER);
+      // 判断收到信号的类型
     if (errno == ICALL_ERRNO_SUCCESS)
     {
       ICall_EntityID dest;
       ICall_ServiceEnum src;
       ICall_HciExtEvt *pMsg = NULL;
-
+      // 获取消息
       if (ICall_fetchServiceMsg(&src, &dest,
                                 (void **)&pMsg) == ICALL_ERRNO_SUCCESS)
       {
@@ -615,6 +630,7 @@ static void SimpleBLEPeripheral_taskFxn(UArg a0, UArg a1)
           }
           else
           {
+              // 处理获取的消息
             // Process inter-task message
             safeToDealloc = SimpleBLEPeripheral_processStackMsg((ICall_Hdr *)pMsg);
           }
@@ -625,7 +641,7 @@ static void SimpleBLEPeripheral_taskFxn(UArg a0, UArg a1)
           ICall_freeMsg(pMsg);
         }
       }
-
+      // 处理消息队列中的消息
       // If RTOS queue is not empty, process app message.
       while (!Queue_empty(appMsgQueue))
       {
@@ -640,13 +656,14 @@ static void SimpleBLEPeripheral_taskFxn(UArg a0, UArg a1)
         }
       }
     }
-
+    // 判断是否有时钟相关的事件
     if (events & SBP_PERIODIC_EVT)
     {
+        // 清空事件
       events &= ~SBP_PERIODIC_EVT;
-
+      // 启动
       Util_startClock(&periodicClock);
-
+      // 执行超时的事件
       // Perform periodic application task
       SimpleBLEPeripheral_performPeriodicTask();
     }

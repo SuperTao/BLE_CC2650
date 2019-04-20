@@ -190,13 +190,13 @@ int main()
   Power_setConstraint(PowerCC26XX_SB_DISALLOW);
   Power_setConstraint(PowerCC26XX_IDLE_PD_DISALLOW);
 #endif // POWER_SAVING | USE_FPGA
-
+  // 初始化ICall
   /* Initialize ICall module */
   ICall_init();
 
   /* Start tasks of external images - Priority 5 */
   ICall_createRemoteTasks();
-
+  // GAP相关设置
   /* Kick off profile - Priority 3 */
   GAPRole_createTask();
 
