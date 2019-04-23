@@ -1,5 +1,7 @@
 根据差分方式，采用内部偏置还是外部偏置的不同，需要在代码中配置RF偏置。
 
+参考连接：https://e2echina.ti.com/question_answer/wireless_connectivity/bluetooth/f/103/p/146436/469305?tisearch=e2e-sitesearch&keymatch=CC2640
+
 ICallBLE/ble_user_config.h
 
 ```
