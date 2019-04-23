@@ -51,3 +51,5 @@ GATT设置连接以后的service，attribute等参数。
 [配置RF偏置](./配置RF偏置.md)
 
 [入门和常见问题](https://e2echina.ti.com/question_answer/w/faq/553.cc2640r2f-cc2640-cc2650)
+
+[更新参数配置](./update_parameter.md)
