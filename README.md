@@ -58,3 +58,5 @@ http://www.ti.com.cn/tool/cn/ccstudio-wcs
 * [入门和常见问题](https://e2echina.ti.com/question_answer/w/faq/553.cc2640r2f-cc2640-cc2650)
 
 * [更新参数配置](./update_parameter.md)
+
+* [property配置](./property配置.md)
