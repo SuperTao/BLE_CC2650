@@ -45,3 +45,7 @@ GAP主要设置广播和连接相关参数，例如广播时间间隔等。
 [GATT初始化](./GATT初始化.md)
 
 GATT设置连接以后的service，attribute等参数。
+
+## 笔记
+
+[配置RF偏置](./配置RF偏置.md)
