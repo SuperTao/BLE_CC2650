@@ -4,15 +4,15 @@
 
 * 文档下载位置：
 
-http://www.ti.com.cn/tool/cn/launchxl-cc2650
+  http://www.ti.com.cn/tool/cn/launchxl-cc2650
 
 * SDK下载位置：
 
-http://www.ti.com.cn/tool/cn/ble-stack
+  http://www.ti.com.cn/tool/cn/ble-stack
 
 * 下载CCS
 
-http://www.ti.com.cn/tool/cn/ccstudio-wcs
+  http://www.ti.com.cn/tool/cn/ccstudio-wcs
 
 ## 环境搭建
 
